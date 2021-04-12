@@ -1,13 +1,10 @@
 *.Rhistory
-*.Rdata
 *.Rproj
-data/
 outputs/
 .Rproj.user/
 .pdf
 .docx
 .doc
-.csv
 .xls
 .xlsx
 .txt
