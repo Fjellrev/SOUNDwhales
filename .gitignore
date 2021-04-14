@@ -1,6 +1,5 @@
 *.Rhistory
 *.Rproj
-outputs/
 .Rproj.user/
 .pdf
 .docx

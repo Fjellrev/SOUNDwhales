@@ -9,20 +9,20 @@
 
 library(dplyr); library(ggplot2)
 
+load("data/SPLvsCumSail_day.RData")
+sailDF <- readRDS("data/CumulatedSailTime_all_shipTypes_5to125km.rds")
+
+
 ## 1 ----
   
-  load("data/SPLvsCumSail_day.RData")
   
   combi %>%
     dplyr::filter(Dist.bin == "cumSailTime25_h") %>%
     ggplot() + geom_point( aes(y = Mean_SPL, x=Sail.time, size = Octave_groups, colour = Date))
 
 
-
 ## 2 ----
 
-  sailDF <- readRDS("data/CumulatedSailTime_all_shipTypes_5to125km.rds")
-   
   p <- ggplot(data = saildf) +
        geom_point(aes(x = date, y = log(cumSailTime_h), colour = radius)) +
        geom_smooth(aes(x = date, y = log(cumSailTime_h), colour = radius), span = 0.1, n =1000) +
@@ -41,7 +41,7 @@ library(dplyr); library(ggplot2)
     select(Date, Octave_groups, Mean_SPL, cumSailTime_h, radius) ->
   combi
   
-  combi %>% dplyr::filter(radius == "10-25 km") %>%
-    ggplot() + geom_point( aes(y = Mean_SPL, x=cumSailTime_h, size = Octave_groups, colour = Date))
+  combi %>% dplyr::filter(radius%in% c("0-5 km") & Octave_groups == "200Hz") %>%
+    ggplot() + geom_point( aes(y = Mean_SPL, x=cumSailTime_h, size = Date, colour = radius))
   
   
