@@ -36,5 +36,21 @@ type  <- types[6]
 
   combi %>% dplyr::filter(radius%in% c("5-10 km") & vesselType == "unknown") %>%
     ggplot() + geom_point( aes(y = Mean_SPL, x=cumSailTime_h, size = Date, colour = Octave_groups))
-  
+
+# view everything as facets to identify types of vessels that may contribute to higher noise levels (fishing and passenger vessels clearly do)
+  combi %>% 
+    dplyr::filter(radius%in% c("5-10 km")) %>% 
+    ggplot()+
+      geom_point(aes(y=Mean_SPL, x=cumSailTime_h, color=Octave_groups)) +
+      geom_smooth(aes(y=Mean_SPL, x=cumSailTime_h, color=Octave_groups), method="glm") +
+      facet_wrap(.~vesselType, ncol= 3)
+    
+# lm
+    summary(lm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("5-10 km"),]))
+    summary(lm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("0-5 km"),]))
+    
+    
+# strangely, fishing gets very small values and passenger gives a negative coefficient?
+  #one thing that would be relevant here would be to test the multivariate response
+    # Mean_SPL * Octave_groups
   
