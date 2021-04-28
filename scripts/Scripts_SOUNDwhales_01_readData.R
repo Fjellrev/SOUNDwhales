@@ -43,14 +43,28 @@ type  <- types[6]
     ggplot()+
       geom_point(aes(y=Mean_SPL, x=cumSailTime_h, color=Octave_groups)) +
       geom_smooth(aes(y=Mean_SPL, x=cumSailTime_h, color=Octave_groups), method="glm") +
-      facet_wrap(.~vesselType, ncol= 3)
+      facet_wrap(.~vesselType, ncol= 3) 
     
 # lm
     summary(lm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("5-10 km"),]))
     summary(lm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("0-5 km"),]))
     
-    
 # strangely, fishing gets very small values and passenger gives a negative coefficient?
   #one thing that would be relevant here would be to test the multivariate response
     # Mean_SPL * Octave_groups
+    
+### Effects of shipping are more predominant under 1000 Hz 
+    # G. M. Wenz, “Acoustic ambient noise in the ocean: spectra and sources”, The Journal of the Acoustical Society of America, 34:12, 1936–1956 (1962).
+    # A. Farcas, C. F. Powell, K. L. Brookes, N. D. Merchant, “Validated shipping noise maps of the Northeast Atlantic”, Science of the Total Environment, 735, 139509 (2020).
+
+    combi %>% 
+      dplyr::filter(radius%in% c("5-10 km")) %>% 
+      dplyr::filter(Octave_groups=="2kHz") %>% 
+      ggplot()+
+      geom_point(aes(y=Mean_SPL, x=cumSailTime_h)) +
+      geom_smooth(aes(y=Mean_SPL, x=cumSailTime_h), method="glm") +
+      facet_wrap(.~vesselType, ncol= 3) 
+    
+    summary(glm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("5-10 km") & combi$Octave_groups=="2kHz",]))
+    summary(glm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("0-5 km") & combi$Octave_groups=="2kHz",]))
   
