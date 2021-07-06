@@ -23,7 +23,7 @@ all.spl <- all.spl %>%
          sail_100km_other2.st = sum(sail_050km_other,sail_100km_unknown),
          sail_125km_other2.st = sum(sail_050km_other,sail_125km_unknown))
 
-load("data/all.spl_V2.RData") #already has the above included, but this is just to show how it came about if we need to change
+load("data/all_spl_V2.RData") #already has the above included, but this is just to show how it came about if we need to change
 
 #############################
 ##create a vector of names to trace back models in set
@@ -31,7 +31,7 @@ load("data/all.spl_V2.RData") #already has the above included, but this is just 
 
 #Modnames <- paste("model", 1:length(Cand.models), sep = " ") #either use this to just have model numbering, or the below
 
-Modnames <- c("Ws * Wd + S25_all", "Ws + Wd + S25_all", "Ws * Wd + S25_fishing + S25_passenger + S25_other + S25_unknown + S25_cargo + S25_tanker", 
+Modnames <- c("Ws * Wd + S25_all", "Ws + Wd + S25_all", "Ws * Wd + S25_fishing + S25_passenger + S25_cargo + S25_tanker + S25_other", 
               
               "Ws * Wd + S50_all", "Ws + Wd + S50_all", "Ws * Wd + S50_fishing + S50_passenger + S50_cargo + S50_tanker + S50_other ", 
               
@@ -184,3 +184,20 @@ aictab(cand.set = Cand.models, modnames = Modnames, sort = TRUE, second.ord = FA
   kbl(caption = "> 2 kHz") %>%
   kable_classic(full_width = FALSE, html_font = "Cambria") %>% 
   save_kable(file = "table3_MF.html", self_contained = TRUE)
+
+
+#####################################
+##### RUN MODELS
+
+m1 <- gls(F_200Hz ~ Mean_wind.st*Mean_wind_dir_cat_simple + sail_025km_fishing.st +  sail_025km_passenger.st + sail_025km_cargo.st + sail_025km_tanker.st + sail_025km_other2.st, data= all.spl, correlation=corCAR1(form = ~ jDate))
+summary(m1)
+
+m2 <- gls(F_2kHz ~ Mean_wind.st*Mean_wind_dir_cat_simple + sail_025km_fishing.st +  sail_025km_passenger.st +  sail_025km_cargo.st + sail_025km_tanker.st + sail_025km_other2.st, data= all.spl, correlation=corCAR1(form = ~ jDate))
+summary(m2)
+
+m3 <- gls(MF ~ Mean_wind.st*Mean_wind_dir_cat_simple + sail_075km_fishing.st +  sail_075km_passenger.st + sail_075km_cargo.st + sail_075km_tanker.st + sail_075km_other2.st, data= all.spl, correlation=corCAR1(form = ~ jDate))
+summary(m3)
+
+
+
+
