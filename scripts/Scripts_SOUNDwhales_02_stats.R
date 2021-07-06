@@ -12,6 +12,7 @@ library(tidyverse)
 library(kableExtra)
 library(nlme)
 library(AICcmodavg)
+library(sjPlot)
 
 
 # create new column to merge vessel types "other" and "unknown"
@@ -198,6 +199,26 @@ summary(m2)
 m3 <- gls(MF ~ Mean_wind.st*Mean_wind_dir_cat_simple + sail_075km_fishing.st +  sail_075km_passenger.st + sail_075km_cargo.st + sail_075km_tanker.st + sail_075km_other2.st, data= all.spl, correlation=corCAR1(form = ~ jDate))
 summary(m3)
 
+## Save model output as html table
 
+## first check how it looks
+tab_model(m1,m2, m3,
+          string.pred = "Coefficient",
+          string.ci = " Conf.Int (95%)",
+          string.p = "P-Value", show.aic = TRUE)
+
+## then change the labels to match and save as html
+tab_model(m1,m2,m3, 
+          pred.labels = c("Intercept", "Wind speed", 
+                          "Wind direction (N-E)","Wind direction (S-W)", "Wind direction (W-N)",  
+                          "Sailing time 0-25 km fishing", "Sailing time 0-25 km passenger", "Sailing time 0-25 km cargo", "Sailing time 0-25 km tanker", "Sailing time 0-25 km other",
+                          "Wind speed:Wind direction (N-E)", "Wind speed:Wind direction (S-W)", 
+                          "Wind speed:Wind direction (W-N)", 
+                          "Sailing time 50-75 km fishing", "Sailing time 50-75 km passenger", "Sailing time 50-75 km cargo", "Sailing time 50-75 km tanker", "Sailing time 50-75 km other"),
+          dv.labels = c("< 200 Hz", "200 to 2000 Hz", "> 2000 Hz"),
+          string.pred = "Coeffcient",
+          string.ci = "Conf. Int (95%)",
+          string.p = "P-Value",
+          file="outputs/Statistics_GLS_Results.html")
 
 
