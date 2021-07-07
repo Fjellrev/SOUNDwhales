@@ -18,11 +18,11 @@ library(sjPlot)
 # create new column to merge vessel types "other" and "unknown"
 all.spl <- all.spl %>%
   rowwise() %>%
-  mutate(sail_025km_other2.st = sum(sail_025km_other,sail_025km_unknown),
-         sail_050km_other2.st = sum(sail_050km_other,sail_050km_unknown),
-         sail_075km_other2.st = sum(sail_075km_other,sail_075km_unknown),
-         sail_100km_other2.st = sum(sail_050km_other,sail_100km_unknown),
-         sail_125km_other2.st = sum(sail_050km_other,sail_125km_unknown))
+  mutate(sail_025km_other2.st = sum(sail_025km_other.st,sail_025km_unknown.st),
+         sail_050km_other2.st = sum(sail_050km_other.st,sail_050km_unknown.st),
+         sail_075km_other2.st = sum(sail_075km_other.st,sail_075km_unknown.st),
+         sail_100km_other2.st = sum(sail_100km_other.st,sail_100km_unknown.st),
+         sail_125km_other2.st = sum(sail_1250km_other.st,sail_125km_unknown.st))
 
 load("data/all_spl_V2.RData") #already has the above included, but this is just to show how it came about if we need to change
 
@@ -220,5 +220,4 @@ tab_model(m1,m2,m3,
           string.ci = "Conf. Int (95%)",
           string.p = "P-Value",
           file="outputs/Statistics_GLS_Results.html")
-
 
