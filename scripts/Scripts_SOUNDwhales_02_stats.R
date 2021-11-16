@@ -21,8 +21,10 @@ all.spl <- all.spl %>%
   mutate(sail_025km_other2.st = sum(sail_025km_other,sail_025km_unknown),
          sail_050km_other2.st = sum(sail_050km_other,sail_050km_unknown),
          sail_075km_other2.st = sum(sail_075km_other,sail_075km_unknown),
-         sail_100km_other2.st = sum(sail_050km_other,sail_100km_unknown),
-         sail_125km_other2.st = sum(sail_050km_other,sail_125km_unknown))
+         sail_100km_other2.st = sum(sail_100km_other,sail_100km_unknown),
+         sail_125km_other2.st = sum(sail_125km_other,sail_125km_unknown))
+
+
 
 load("data/all_spl_V2.RData") #already has the above included, but this is just to show how it came about if we need to change
 
@@ -84,14 +86,16 @@ Cand.models[[17]] <- gls(F_200Hz ~ Mean_wind.st+Mean_wind_dir_cat_simple + sum.s
 
 
 ##round to 4 digits after decimal point, give log-likelihood, remove AICc and use AIC instead
-print(aictab(cand.set = Cand.models, modnames = Modnames, sort = TRUE, second.ord = FALSE),
+print(aictab(cand.set = Cand.models, modnames = Modnames, sort = TRUE, second.ord = FALSE, method = "ML"),
       digits = 4, LL = TRUE) 
 
 ##view the table in Viewer (rather than in console) and save as html
-aictab(cand.set = Cand.models, modnames = Modnames, sort = TRUE, second.ord = FALSE) %>%
+aictab(cand.set = Cand.models, modnames = Modnames, sort = TRUE, second.ord = FALSE, method = "ML") %>%
   kbl(caption = "< 200 Hz") %>%
-  kable_classic(full_width = FALSE, html_font = "Cambria") %>% 
-  save_kable(file = "table1_200.html", self_contained = TRUE)
+  kable_classic(full_width = FALSE, html_font = "Cambria") %>% View()
+  # save_kable(file = "table1_200.html", self_contained = TRUE)
+
+plot(resid(Cand.models[[3]]))
 
 ############
 # 2 kHz ###
