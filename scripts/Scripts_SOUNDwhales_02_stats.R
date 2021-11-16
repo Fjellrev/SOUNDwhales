@@ -18,13 +18,12 @@ library(sjPlot)
 # create new column to merge vessel types "other" and "unknown"
 all.spl <- all.spl %>%
   rowwise() %>%
-  mutate(sail_025km_other2.st = sum(sail_025km_other,sail_025km_unknown),
-         sail_050km_other2.st = sum(sail_050km_other,sail_050km_unknown),
-         sail_075km_other2.st = sum(sail_075km_other,sail_075km_unknown),
-         sail_100km_other2.st = sum(sail_100km_other,sail_100km_unknown),
-         sail_125km_other2.st = sum(sail_125km_other,sail_125km_unknown))
 
-
+  mutate(sail_025km_other2.st = sum(sail_025km_other.st,sail_025km_unknown.st),
+         sail_050km_other2.st = sum(sail_050km_other.st,sail_050km_unknown.st),
+         sail_075km_other2.st = sum(sail_075km_other.st,sail_075km_unknown.st),
+         sail_100km_other2.st = sum(sail_100km_other.st,sail_100km_unknown.st),
+         sail_125km_other2.st = sum(sail_125km_other.st,sail_125km_unknown.st))
 
 load("data/all_spl_V2.RData") #already has the above included, but this is just to show how it came about if we need to change
 
@@ -225,4 +224,22 @@ tab_model(m1,m2,m3,
           string.p = "P-Value",
           file="outputs/Statistics_GLS_Results.html")
 
+#####################################
+##### DIAGNOSTIC PLOTS
 
+## The residuals "bounce randomly" around the 0 line. This suggests that the assumption that the relationship is linear is reasonable.
+## The residuals roughly form a "horizontal band" around the 0 line. This suggests that the variances of the error terms are equal.
+## No one residual "stands out" from the basic random pattern of residuals. This suggests that there are no outliers.
+
+plot(m1, abline=0)
+
+
+## normality and skewness
+##If the skewness is between -0.5 and 0.5, the data are fairly symmetrical.
+##If the skewness is between -1 and -0.5 (negatively skewed) or between 0.5 and 1 (positively skewed), the data are moderately skewed.
+##If the skewness is less than -1 (negatively skewed) or greater than 1(positively skewed), the data are highly skewed.
+
+hist(residuals(m1), breaks=5, freq=FALSE)
+hist(residuals(m1), breaks=10, freq=FALSE)
+library(moments)
+print(skewness(residuals(m1)))

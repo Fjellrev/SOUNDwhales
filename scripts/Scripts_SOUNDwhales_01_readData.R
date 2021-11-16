@@ -68,3 +68,10 @@ type  <- types[6]
     summary(glm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("5-10 km") & combi$Octave_groups=="2kHz",]))
     summary(glm (Mean_SPL ~ cumSailTime_h * vesselType, data=combi[combi$radius%in%c("0-5 km") & combi$Octave_groups=="2kHz",]))
   
+  ggsave(plot = last_plot(), "outputs/GLM_Effect_SailShip_5to10km.png", dpi = 150, width = 30, height = 15, units = "cm", device = "png")
+    
+    
+    
+    
+    
+    
