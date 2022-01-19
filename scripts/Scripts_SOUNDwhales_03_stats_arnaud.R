@@ -13,66 +13,46 @@ library(kableExtra)
 library(nlme)
 library(AICcmodavg)
 library(sjPlot)
+library(MASS)
 
-load("data/all_spl_V2.RData")
+load("data/all_spl_V3.RData")
 
 # create new column to merge vessel types "other" and "unknown"
-all.spl %>%
-  mutate(sail_025km_other = sail_025km_other + sail_025km_unknown,
-         sail_050km_other = sail_050km_other + sail_050km_unknown,
-         sail_075km_other = sail_075km_other + sail_075km_unknown,
-         sail_100km_other = sail_100km_other + sail_100km_unknown,
-         sail_125km_other = sail_125km_other + sail_125km_unknown) %>%
-  dplyr::select(Date, jDate, F_200Hz, F_2kHz, MF, Mean_wind, Mean_wind_dir, Mean_wind_dir_cat_simple,
+all_spl %>%
+  mutate(sail_05km_other = sail_05km_other + sail_05km_unknown,
+         sail_10km_other = sail_10km_other + sail_10km_unknown,
+         sail_15km_other = sail_15km_other + sail_15km_unknown,
+         sail_20km_other = sail_20km_other + sail_20km_unknown,
+         sail_25km_other = sail_25km_other + sail_25km_unknown) %>%
+  dplyr::select(Date, jDate, LF_200Hz, LF_2kHz, MF, Mean_wind, Mean_wind_dir, Mean_wind_dir_cat_simple, PA,
                 contains("km_"), -contains(".st"), -contains("unknown")) %>%
-  # dplyr::mutate(across(contains("sail_"), ~log(.x + 1e-20))) ->
+  dplyr::mutate(across(contains("sail_"), ~log10(.x + 0.001))) %>%
   as.data.frame() %>%
   # dplyr::mutate(across(contains("sail_"), ~scale(.x))) %>%
-  dplyr::mutate(Mean_wind = scale(Mean_wind)) ->
+  dplyr::mutate(Mean_wind = scale(Mean_wind)) %>%
+  ungroup()->
 mdf
 
-rm(all.spl)
+
 
 m <- list() 
 
-m[[1]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_025km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[2]] <- gls(F_200Hz ~ Mean_wind+Mean_wind_dir_cat_simple + sail_025km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[3]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_025km_fishing +  sail_025km_passenger + sail_025km_cargo + sail_025km_tanker + sail_025km_other, data = mdf, correlation=corCAR1(form = ~ jDate))
+m[[1]] <- gls(LF_2kHz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_25km_All + sail_05km_All + sail_15km_All + sail_10km_All + sail_20km_All  + PA, data= mdf, correlation=corCAR1(form = ~ jDate), method = "ML")
+m[[2]] <- gls(LF_2kHz ~ Mean_wind*Mean_wind_dir_cat_simple , data = all_spl, correlation=corCAR1(form = ~ jDate), method = "ML")
+m[[3]] <- gls(LF_2kHz ~ Mean_wind , data = all_spl, correlation=corCAR1(form = ~ jDate), method = "ML")
+m[[4]] <- gls(LF_2kHz ~ 1, data = all_spl, correlation=corCAR1(form = ~ jDate), method = "ML")
+m[[5]] <- gls(LF_2kHz ~ Mean_wind + sail_25km_All + PA, data= mdf, correlation=corCAR1(form = ~ jDate), method = "ML")
+m[[6]] <- gls(LF_2kHz ~ Mean_wind + sail_10km_All, data= mdf, correlation=corCAR1(form = ~ jDate), method = "ML")
 
-m[[4]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_050km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[5]] <- gls(F_200Hz ~ Mean_wind+Mean_wind_dir_cat_simple + sail_050km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[6]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_050km_fishing +  sail_050km_passenger + sail_050km_cargo + sail_050km_tanker + sail_050km_other, data = mdf, correlation=corCAR1(form = ~ jDate))
+  
+  stepAIC(m[[1]])
 
-m[[7]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_075km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[8]] <- gls(F_200Hz ~ Mean_wind+Mean_wind_dir_cat_simple + sail_075km_all, data = mdf, correlation=corCAR1(form = ~  jDate))
-m[[9]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_075km_fishing +  sail_075km_passenger + sail_075km_cargo + sail_075km_tanker + sail_075km_other, data = mdf, correlation=corCAR1(form = ~ jDate))
-
-m[[10]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_100km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[11]] <- gls(F_200Hz ~ Mean_wind+Mean_wind_dir_cat_simple + sail_100km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[12]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_100km_fishing +  sail_100km_passenger + sail_100km_cargo + sail_100km_tanker + sail_100km_other, data = mdf, correlation=corCAR1(form = ~ jDate))
-
-m[[13]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_125km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[14]] <- gls(F_200Hz ~ Mean_wind+Mean_wind_dir_cat_simple + sail_125km_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[15]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_125km_fishing +  sail_125km_passenger + sail_125km_cargo + sail_125km_tanker + sail_125km_other, data = mdf, correlation=corCAR1(form = ~ jDate))
-
-m[[16]] <- gls(F_200Hz ~ 1, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[17]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sail_025km_fishing + sail_025km_cargo, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[18]] <- gls(F_200Hz ~ Mean_wind * Mean_wind_dir_cat_simple + sail_025km_fishing + sail_025km_cargo, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[19]] <- gls(F_200Hz ~ Mean_wind * Mean_wind_dir_cat_simple + sail_025km_fishing, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[20]] <- gls(F_200Hz ~ Mean_wind * Mean_wind_dir_cat_simple + sail_025km_cargo, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[21]] <- gls(F_200Hz ~ Mean_wind, data = mdf, correlation=corCAR1(form = ~ jDate))
-m[[22]] <- gls(F_200Hz ~ sail_025km_cargo, data = mdf, correlation=corCAR1(form = ~ jDate))
-# m[[16]] <- gls(F_200Hz ~ Mean_wind*Mean_wind_dir_cat_simple + sum.sail_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-# m[[17]] <- gls(F_200Hz ~ Mean_wind+Mean_wind_dir_cat_simple + sum.sail_all, data = mdf, correlation=corCAR1(form = ~ jDate))
-
-#m[[18]] <- gls(F_200Hz ~ 1 + sail_025km.st, data = mdf, correlation=corCAR1(form = ~ jDate))
-
-mod.names <- sapply(m, function(x) gsub("MF ~ ", "", as.character(x$call[2])))
+mod.names <- sapply(m, function(x) gsub("LF_2kHz ~ ", "", as.character(x$call[2])))
 mod.names[which(mod.names == "1")] <- "null model"
 
 View(aictab(cand.set = m, sort = TRUE, modnames = mod.names, second.ord = FALSE, method = "ML"))
 
-bestmod <- m[[3]]
+bestmod <- m[[6]]
 summary(bestmod)
 qqnorm(bestmod, abline = c(0,1))
 plot(fitted(bestmod), residuals(bestmod)); abline(h=0, col = "red")
